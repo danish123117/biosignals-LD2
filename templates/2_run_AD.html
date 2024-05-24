@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthy Operator Platform</title>
+    <link href=" {{url_for('static', filename = 'css/styles.css')}}" rel ='stylesheet'/>
+
+</head>
+<body>
+    <h1> Trial initialisation status</h1>
+    <h2>Entity Creation Status </h2>
+    <p>Trial entity creation status :{{entity_create_code}}</p>
+    <h2>Sensor Provision status</h2>
+    <p>Fiware Service path: {{servicepath_status}} :  <br>
+        Sensor Provision: {{sensor_status}} :  
+    </p>
+
+    <form action = '/runAD'>
+        <button type = "submit">Start Anomaly detector</button>
+    </form>
+
+    <form action = '/setup'>
+        <input type = "text" name = "trial name" id = "trial name" placeholder="Re-Enter Trial Name"/>
+        <button type = "submit">Create new trial </button>
+    </form>
+    
+</body>
+</html>
