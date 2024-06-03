@@ -4,7 +4,7 @@ from ngsiOperations.ngsildOperations.ngsildCrudOperations import ngsi_get_curren
 import time 
 import numpy as np 
 
-url = "mosquitto"
+url = "10.250.3.30"
 
 def mqtt_payload(Rob_state):
     current_time = time.strftime("%Y-%m-%dT%H:%M:%S.", time.localtime()) + '{:03d}'.format(int(round(time.time() * 1000)) % 1000)
