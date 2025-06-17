@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human in the Loop</title>
+    
+    <!-- Flask Jinja path for production -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+
+    <!-- Direct path for local testing -->
+    <!-- <link href="static/css/styles.css" rel="stylesheet"> -->
+</head>
+<body>
+    <div class="header">
+        <!-- Flask Jinja path for production -->
+        <img src="{{ url_for('static', filename='images/INCODE_logo.png') }}" alt="INCODE Logo" class="logo">
+        
+        <!-- Direct path for local testing -->
+         
+        <h1>Human in the Loop</h1>
+        <div class="logos">
+            <!-- Flask Jinja path for production -->
+            <img src="{{ url_for('static', filename='images/polimi_logo.png') }}" alt="Politecnico di Milano Logo" class="logo">
+            <img src="{{ url_for('static', filename='images/made_logo.png') }}" alt="MADE Competence Center Logo" class="logo">
+            
+        </div>
+    </div>
+        <!-- Real-Time EMG Values -->
+        <div class="container">
+            <div class="main">
+                <h2>Real-Time Sensor Values</h2>
+                            <p>
+                <!-- Original checkbox -->
+                <!-- <label>
+                    <input type="checkbox" id="toggleUpdates"> Enable Real-Time Updates
+                </label> -->
+
+                <!-- Slider version -->
+                <label class="switch">
+                    <input type="checkbox" id="toggleUpdates">
+                    <span class="slider round"></span>
+                </label>
+                <span>Enable Real-Time Updates</span>
+            </p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>EMG Values</th>
+                            <th>HR & RR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>EMG 1: <span id="emg1">---</span></td>
+                            <td>HR: <span id="hrValue">---</span></td>
+                        </tr>
+                        <tr>
+                            <td>EMG 2: <span id="emg2">---</span></td>
+                            <td>RR: <span id="rrValue">---</span></td>
+                        </tr>
+                        <tr>
+                            <td>EMG 3: <span id="emg3">---</span></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>EMG 4: <span id="emg4">---</span></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>EMG 5: <span id="emg5">---</span></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>EMG 6: <span id="emg6">---</span></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+        <div class="main">
+            <p>
+                <!-- Original checkbox -->
+                <!-- <label>
+                    <input type="checkbox" id="start_AD"> Start Fatigue detector
+                </label> -->
+
+                <!-- Slider version -->
+                <label class="switch">
+                    <input type="checkbox" id="start_AD">
+                    <span class="slider round"></span>
+                </label>
+                <span>Start Stress Detector</span>
+            </p>
+            <div id="fatigue-state">
+                <p>Operator state: <span id="OP-State">---</span></p>
+            </div>
+
+            <p>
+                <label class="switch">
+                    <input type="checkbox" id="start_CEP">
+                    <span class="slider round"></span>
+                </label>
+                <span>Cobot-Mode</span>
+            </p>
+            <div id="cobot-state">
+                <p>Mode: <span id="Cobot-Mode">---</span></p>
+            </div>
+        </div>
+
+        <div class="main">
+            <form action = "/stopTrial">
+                <button type = "submit">Stop</button>
+            </form>
+            <form action = '/setup'>
+                <input type = "text" name = "trial name" id = "trial name" placeholder="Re-Enter Trial Name"/>
+                <button type = "submit">Create new trial</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script_p1.js') }}"></script>
+
+</body>
+</html>
