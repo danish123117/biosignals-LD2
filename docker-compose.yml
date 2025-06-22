@@ -196,7 +196,7 @@ services:
     - MINTAKA_PORT=8080
     - CONTEXT_CONTAINER_NAME=context
     - CONTEXT_PORT=5051
-    - ARKITE_URL=http://localhost:2001/test
+    - ARKITE_URL=http://dummyserver:2001/test
     networks:
       - default
 
@@ -211,6 +211,17 @@ services:
         - MQTT_BROKER_PORT=1883
     depends_on:
       - mosquitto 
+  
+  dummyserver:
+    image: danny0117/incode-heu-dummy-arkite-server:0.0.1
+    hostname: dummyserver
+    container_name: dummyserver
+    expose:
+      - "2001"
+    ports:
+      - "2001:2001"
+    networks:
+      - default
 
 networks:
   default:
