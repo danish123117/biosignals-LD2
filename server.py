@@ -2,11 +2,9 @@ from flask import Flask , render_template, request, jsonify
 from ngsiOperations.ngsildOperations.ngsildEntityCreator import*
 from ngsiOperations.ngsildOperations.ngsildSensorProvision import*
 #from ngsiOperations.ngsildOperations.ngsildSubscriptions import createSubscriptions
-from AD import*
-from CEP import*
+#from AD import*
+#from CEP import*
 from waitress import serve
-import threading
-import queue
 import os
 import ngsiOperations.ngsildOperations.ngsildCrudOperations as v1
 import helperFunctions.helperFunctions as hp
@@ -14,9 +12,10 @@ import bioTools.emgTools as emg
 import bioTools.heartTools as heart
 import requests
 import json
-import paho.mqtt.client as mqtt
 import time
 import numpy as np
+import joblib
+import pandas as pd
 #client = None
 #client_queue = queue.Queue()
 
@@ -32,8 +31,10 @@ BROKER_IP = os.getenv("MOSQUITTO_CONTAINER_NAME","localhost")
 BROKER_PORT = os.getenv("MOSQUITTO_CONTAINER_PORT",1883)
 TOPIC = os.getenv("TOPIC","json/danishabbas1/Robotstate")
 ENTITY_FATIGUE = os.getenv("ENTITY_FATIGUE","urn:ngsi-ld:EmgFrequencyDomainFeatures:002")
-ARKITE_URL = os.getenv("ARKITE_URL","http://10.250.3.30")
-#ARKITE_URL = os.getenv("ARKITE_URL","http://localhost:2001/test")
+#ARKITE_URL = os.getenv("ARKITE_URL","http://10.250.3.30")
+ARKITE_URL = os.getenv("ARKITE_URL","http://localhost:2001/test")
+
+MODEL = joblib.load("baseline-scaler.pkl")
 
 app = Flask(__name__)
 
@@ -56,7 +57,17 @@ def on_disconnect(client, userdata, rc):
     print("Disconnected from MQTT broker")
 
 
-
+def predict_stress(data):
+    """
+    This function is a placeholder for the stress prediction logic.
+    It should return True if stress is detected, otherwise False.
+    """
+    features = ['meanRR', 'meanHR', 'sdnn', 'sdsd', 'rmssd', 'pnn20', 'vlfp', 'lfp',
+            'hfp', 'vlf', 'lf', 'hf', 'lfhfratio', 'totalPower']
+    X_input = pd.DataFrame([[data[feat] for feat in features]], columns=features)
+    pred = MODEL.predict(X_input)
+    # Implement your stress prediction logic here
+    return int(pred)  # Placeholder return value
 
 @app.route('/')
 @app.route('/index')
@@ -100,7 +111,7 @@ def day_0():
     else: 
         entity_status = "Failed!"
 
-    servicepath_provision_response , sensor_provision_response = sensor_provision_UC2(iota_container_name,iota_container_port,orion, orion_port) ##
+    servicepath_provision_response , sensor_provision_response = sensor_provision_UC2_2(iota_container_name,iota_container_port,orion, orion_port) ##
     
     if servicepath_provision_response.status_code==201:
         servicepath_status ="OK!"
@@ -244,21 +255,29 @@ def send_robot_state():
         indices = np.array([0, 1, 4, 5])
         Rob_state = False
 
-        stress_state = ngsi_get_current(entity=entityStress, orion=orion, orion_port=orion_port, context=CONTEXT_NAME, context_port=CONTEXT_PORT)
-
+        stress_state = v1.ngsi_get_current(entity=entityStress, orion=orion, orion_port=orion_port, context=CONTEXT_NAME, context_port=CONTEXT_PORT)
+        hrv_features = v1.ngsi_get_current_hrv(entity="urn:ngsi-ld:HrvFeatures:001", orion=orion, orion_port=orion_port, context=CONTEXT_NAME, context_port=CONTEXT_PORT)
         mean = np.array(stress_state["meanFrequencyState"]['value'])[indices]
         median = np.array(stress_state["medianFrequencyState"]['value'])[indices]
         pow = np.array(stress_state["meanPowerFrequencyState"]['value'])[indices]
         zcf = np.array(stress_state["zeroCrossingFrequencyState"]['value'])[indices]
         cumulative = (pow + mean) / 2
 
+
+        # Predict stress using the HRV features
+        stress_prediction = predict_stress(hrv_features)
+        print(f"Stress prediction: {stress_prediction}")
         Rob_state = not np.any(cumulative > 1)
         print(f"Robot state: {Rob_state}")
-        payload = json.dumps(mqtt_payload(Rob_state))
+        if stress_prediction==1 or Rob_state==True:
+            state = True
+        else:
+            state = False
+        payload = json.dumps(mqtt_payload(state))
 
         resp = requests.request("POST",ARKITE_URL,  headers={}, data=payload)
         print(f"Response from MQTT broker: {resp.status_code}")
-        return jsonify({"status": "MQTT message sent", "robot_state": Rob_state})
+        return jsonify({"status": "MQTT message sent", "robot_state": state})
     except Exception as e:
         return jsonify({"status": "Error", "error": str(e)})
 

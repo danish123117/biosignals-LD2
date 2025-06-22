@@ -179,29 +179,30 @@ services:
     networks:
       - default
 
-  # application: 
-  #   image : danny0117/incode-heu-aa3-uc1:1.0.9
-  #   hostname: application
-  #   container_name: application
-  #   expose:
-  #     - "3002"
-  #   ports:
-  #     - "3002:3002"
-  #   environment:
-  #   - ORION_NAME=orion
-  #   - ORION_PORT=1026
-  #   - IOTA_CONTAINER_NAME=iot-agent
-  #   - IOTA_CONTAINER_PORT=4041
-  #   - MINTAKA_NAME=mintaka
-  #   - MINTAKA_PORT=8080
-  #   - CONTEXT_CONTAINER_NAME=context
-  #   - CONTEXT_PORT=5051
-  #   - MOSQUITTO_CONTAINER_NAME=mosquitto
-  #   - MOSQUITTO_CONTAINER_PORT=1883
-  #   networks:
-  #     - default
+  application: 
+    image : danny0117/incode-heu-aa3-uc2:2.0.0
+    hostname: application
+    container_name: application
+    expose:
+      - "3002"
+    ports:
+      - "3002:3002"
+    environment:
+    - ORION_NAME=orion
+    - ORION_PORT=1026
+    - IOTA_CONTAINER_NAME=iot-agent
+    - IOTA_CONTAINER_PORT=4041
+    - MINTAKA_NAME=mintaka
+    - MINTAKA_PORT=8080
+    - CONTEXT_CONTAINER_NAME=context
+    - CONTEXT_PORT=5051
+    - ARKITE_URL=http://localhost:2001/test
+    networks:
+      - default
+
+
   topicbridge:
-    image: danny0117/incode-heu-mqtt-topic-bridge:1.1.0
+    image: danny0117/incode-heu-mqtt-topic-bridge:2.0.0
     hostname: topicbridge
     container_name: topicbridge 
     environment:
