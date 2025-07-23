@@ -31,10 +31,25 @@ BROKER_IP = os.getenv("MOSQUITTO_CONTAINER_NAME","localhost")
 BROKER_PORT = os.getenv("MOSQUITTO_CONTAINER_PORT",1883)
 TOPIC = os.getenv("TOPIC","json/danishabbas1/Robotstate")
 ENTITY_FATIGUE = os.getenv("ENTITY_FATIGUE","urn:ngsi-ld:EmgFrequencyDomainFeatures:002")
-#ARKITE_URL = os.getenv("ARKITE_URL","http://10.250.3.30")
+ENTITY_BASELINE_EMG = os.getenv("ENTITY_BASELINE_EMG","urn:ngsi-ld:baseline:EMG02")
+ENTITY_BASELINE_HRV = os.getenv("ENTITY_BASELINE_HRV","urn:ngsi-ld:baseline:HRV02")
 ARKITE_URL = os.getenv("ARKITE_URL","http://localhost:2001/test")
+CANIS_MAJOR_NAME = os.getenv("CANIS_MAJOR_NAME","localhost")
+CANIS_MAJOR_PORT = os.getenv("CANIS_MAJOR_PORT","8080") # multiphhen
+WALLET_ADDRESS = os.getenv("WALLET_ADDRESS","http://vault.canis-major.svc:8200/v1/ethereum/accounts/danish")
 
 MODEL = joblib.load("baseline-scaler.pkl")
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+params_path = os.path.join(script_dir, 'parms.json')
+params_path_h = os.path.join(script_dir, 'ecgbase.json')
+
+with open(params_path, 'r') as json_file:
+    BASELINE_EMG = json.load(json_file)
+with open(params_path_h, 'r') as json_file_h:
+    BASELINE_HRV = json.load(json_file_h)
+
+
 
 app = Flask(__name__)
 
@@ -134,17 +149,14 @@ def anomaly_detector():
     '''The looped part has an execution time of ~0.065 seconds'''
     window_length = 5000
     window_length_h = 180
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    params_path = os.path.join(script_dir, 'parms.json')
-    params_path_h = os.path.join(script_dir, 'ecgbase.json')
 
-    with open(params_path, 'r') as json_file:
-        parms = json.load(json_file)
-    with open(params_path_h, 'r') as json_file_h:
-        parms_h = json.load(json_file_h)
+    global BASELINE_EMG
+    global BASELINE_HRV
+
+################################
       # add context/ context port here
     data = v1.ngsi_get_historical(entity='urn:ngsi-ld:sEMG:EMG1001',window_length=window_length,mintaka=MINTAKA_NAME,mintaka_port=MINTAKA_PORT,context=CONTEXT_NAME,context_port=CONTEXT_PORT,attribute='data')
-    data_h = v1.ngsi_get_historical('urn:ngsi-ld:PolarH10TopicHR:001',window_length=window_length_h,attribute='rr',mintaka=MINTAKA_NAME,mintaka_port=MINTAKA_PORT,context=CONTEXT_NAME,context_port=CONTEXT_PORT)
+    data_h = v1.ngsi_get_historical('urn:ngsi-ld:PolarH10TopicHR:hr',window_length=window_length_h,attribute='rr',mintaka=MINTAKA_NAME,mintaka_port=MINTAKA_PORT,context=CONTEXT_NAME,context_port=CONTEXT_PORT)
     if data:
         data_arr= hp.data_to_np(data) # convert data from timescaleDB to np array shape (6, window length) this is transposed
         #print(data_h)
@@ -152,7 +164,7 @@ def anomaly_detector():
         
         filter_data = emg.data_filter(data_arr,sampling_frequency=1000,band_lower=20,band_upper=450) # applies band pass filter shape is still (6,window lenght) check if it works
         median_frequency , mean_frequency, mean_power_frequency, zero_cross_frequency = emg.out_stft(np.transpose(filter_data),sampling_frequency=1000) # extracted features , these should be 3 (1x6) lists 
-        s_mean, s_med, s_mpower, s_zcf = emg.stress_out(mean_frequency, median_frequency, mean_power_frequency,zero_cross_frequency, parms) # stress level 
+        s_mean, s_med, s_mpower, s_zcf = emg.stress_out(mean_frequency, median_frequency, mean_power_frequency,zero_cross_frequency, BASELINE_EMG) # stress level 
         #print(s_mean, s_med, s_mpower, s_zcf)
         payload_raw = v1.stress_payload(s_mean.tolist(), s_med.tolist(), s_mpower.tolist(), s_zcf.tolist() )    
         json_data = json.dumps(payload_raw)
@@ -163,7 +175,7 @@ def anomaly_detector():
         heart_parms_t = heart.timeDomainFeatures(list_rr)
         heart_parms_f = heart.frequencyDomainFeatures(list_rr)
         heart_parms = {**heart_parms_t, **heart_parms_f}  # Combine time and frequency domain features
-        payload_hr_raw = v1.hr_payload(heart_parms, parms_h) # this is the payload for HRV features
+        payload_hr_raw = v1.hr_payload(heart_parms, BASELINE_HRV) # this is the payload for HRV features
         json_data_hr = json.dumps(payload_hr_raw)
         #print(payload_hr_raw)
 
@@ -201,7 +213,7 @@ def get_emg_data(orion=ORION_NAME, orion_port=ORION_PORT, context=CONTEXT_NAME, 
 
 @app.route('/get_hr_data', methods=['GET'])
 def get_hr_data(orion=ORION_NAME, orion_port=ORION_PORT, context=CONTEXT_NAME, context_port=CONTEXT_PORT):
-    entity_id = "urn:ngsi-ld:PolarH10TopicHR:001"
+    entity_id = "urn:ngsi-ld:PolarH10TopicHR:hr"
     url = f"http://{orion}:{orion_port}/ngsi-ld/v1/entities/{entity_id}"
     headers = {
         'Link': f'<http://{context}:{context_port}/ngsi-context.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"',
@@ -282,6 +294,24 @@ def send_robot_state():
         return jsonify({"status": "Error", "error": str(e)})
 
 
+@app.route('/load_baseline', methods=['GET', 'POST'])
+def load_baseline():
+    context = CONTEXT_NAME
+    context_port = CONTEXT_PORT
+    global BASELINE_EMG
+    global BASELINE_HRV
+    print("Loading baseline...")
+    response = v1.ngsi_get_current_canis(entity=ENTITY_BASELINE_EMG, canis_major=CANIS_MAJOR_NAME, canis_major_port=CANIS_MAJOR_PORT, context=context, context_port=context_port, wallet_address=WALLET_ADDRESS )
+    response2 = v1.ngsi_get_current_canis(entity=ENTITY_BASELINE_HRV, canis_major=CANIS_MAJOR_NAME, canis_major_port=CANIS_MAJOR_PORT, context=context, context_port=context_port, wallet_address=WALLET_ADDRESS )
+    if response and response2:
+        print("201")
+        BASELINE_HRV = hp.generate_baseline_hrv(response2)
+        BASELINE_EMG = hp.generate_baseline_emg(response)
+        return jsonify({"status": "Baseline loaded successfully"})
+    else:
+        print("not 201")
+        return jsonify({"status": "Failed to load baseline"})
+    
 
 @app.route('/stopTrial', methods=['GET', 'POST'])
 def stop_trial():
@@ -290,6 +320,9 @@ def stop_trial():
         return jsonify({"status": "Trial stopped successfully"})
     else:
         return jsonify({"status": "Failed to stop trial", "error": response.text}), response.status_code
+
+
+
 ##########old code#####
 
                            

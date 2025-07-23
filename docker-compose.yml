@@ -180,7 +180,7 @@ services:
       - default
 
   application: 
-    image : danny0117/incode-heu-aa3-uc2:2.0.0
+    image : danny0117/incode-heu-aa3-uc2:2.0.1
     hostname: application
     container_name: application
     expose:

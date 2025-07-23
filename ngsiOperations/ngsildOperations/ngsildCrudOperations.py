@@ -94,3 +94,56 @@ def ngsi_get_current_hrv(entity, orion,orion_port,context,context_port): # this 
 
     response = requests.request("GET", url, headers=headers, data=payload)
     return response.json()
+
+def ngsi_get_current_canis(entity, canis_major,canis_major_port,context,context_port,wallet_address): # this should be ok
+    url = f"http://{canis_major}:{canis_major_port}/ngsi-ld/v1/entities/{entity}?options=keyValues"
+
+    payload = {}
+    headers = {
+  'Link': f'<http://{context}:{context_port}/ngsi-context-canism-uc2.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"',
+  'Accept': 'application/json',
+  'Wallet-Type': 'vault',
+   'Wallet-Token': 'vault-plaintext-root-token',
+   'Wallet-Address': wallet_address,
+   'NGSILD-TENANT': 'orion',
+   'Content-Type': 'application/json'
+
+}
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    return response.json()
+
+
+def ngsi_patch_canis(data,entity,canis_major,canis_major_port,context,context_port,wallet_address): # this should be ok
+    """
+    The function update the value on an NGSI-ld entity using patch to canis major context broker
+    """
+    url = f"http://{canis_major}:{canis_major_port}/ngsi-ld/v1/entities/{entity}/attrs"
+    headers = {
+        'Content-Type': "application/json",
+        "Link": f'<http://{context}:{context_port}/ngsi-context-canism-uc2.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"',
+        'Wallet-Type': 'vault',
+        'Wallet-Token': 'vault-plaintext-root-token',
+        'Wallet-Address': wallet_address,
+        'NGSILD-TENANT': 'orion',
+        'Accept': 'application/json'
+     }
+    response = requests.request("POST", url, headers=headers, data=data) # by default it is PAtch is not supported by canis major but will be updated in multiphen 
+    return response 
+
+def ngsi_post_canis(data, canis_major, canis_major_port, context, context_port, wallet_address):
+    """
+    The function creates a new NGSI-ld entity using post to canis major context broker
+    """
+    url = f"http://{canis_major}:{canis_major_port}/ngsi-ld/v1/entities"
+    headers = {
+        'Content-Type': "application/ld+json",
+        "Link": f'<http://{context}:{context_port}/ngsi-context-canism-uc2.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"',
+        'Wallet-Type': 'vault',
+        'Wallet-Token': 'vault-plaintext-root-token',
+        'Wallet-Address': wallet_address,
+        'NGSILD-TENANT': 'orion',
+        'Accept': 'application/json'
+     }
+    response = requests.request("POST", url, headers=headers, data=data)
+    return response

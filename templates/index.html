@@ -26,11 +26,11 @@
             </form>
         </div>
         <div class="main">
-            <h1>Historical Trial Data</h1>
-            <form action = "/historypage">
-                <button class="button2" type = "submit">View trial history </button>
-            </form>
+            <h1>Load Baseline</h1>
+                <button id="loadBaselineBtn" class="button2" type="button">Load Baseline</button>
+                <div id="baselineStatus" class="status-message"></div>
         </div>
     </div>
+        <script src="{{ url_for('static', filename='script_p0.js') }}"></script>
 </body>
 </html>

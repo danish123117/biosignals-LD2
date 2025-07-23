@@ -125,7 +125,7 @@ def sensor_provision_UC2(iota_container_name,iota_container_port,orion, orion_po
             },
                         {
                 "device_id": "hr",
-                "entity_name": "urn:ngsi-ld:PolarH10TopicHR:001",
+                "entity_name": "urn:ngsi-ld:PolarH10TopicHR:hr",
                 "entity_type": "PolarH10TopicHR",
                 "attributes": [
                     {"object_id": "timeStamp", "name": "timeStamp", "type": "Property"},
@@ -291,7 +291,7 @@ def sensor_provision_UC2_2(iota_container_name,iota_container_port,orion, orion_
             },
                         {
                 "device_id": "ecg",
-                "entity_name": "urn:ngsi-ld:PolarH10TopicECG:001",
+                "entity_name": "urn:ngsi-ld:PolarH10TopicECG:ecg",
                 "entity_type": "PolarH10TopicECG",
                 "attributes": [
                     {"object_id": "timeStamp", "name": "timeStamp", "type": "Property"},
@@ -308,7 +308,7 @@ def sensor_provision_UC2_2(iota_container_name,iota_container_port,orion, orion_
             },
                         {
                 "device_id": "hr",
-                "entity_name": "urn:ngsi-ld:PolarH10TopicHR:001",
+                "entity_name": "urn:ngsi-ld:PolarH10TopicHR:hr",
                 "entity_type": "PolarH10TopicHR",
                 "attributes": [
                     {"object_id": "timeStamp", "name": "timeStamp", "type": "Property"},
@@ -328,7 +328,7 @@ def sensor_provision_UC2_2(iota_container_name,iota_container_port,orion, orion_
             },
                         {
                 "device_id": "acc",
-                "entity_name": "urn:ngsi-ld:PolarH10TopicACC:001",
+                "entity_name": "urn:ngsi-ld:PolarH10TopicACC:acc",
                 "entity_type": "PolarH10TopicACC",
                 "attributes": [
                     {"object_id": "timeStamp", "name": "timeStamp", "type": "Property"},

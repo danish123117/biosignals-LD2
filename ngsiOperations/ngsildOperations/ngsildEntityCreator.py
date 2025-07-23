@@ -55,7 +55,7 @@ def ngsi_create_trial_UC2(orion,orion_port,context,context_port):
     }
     ar = 73*[0]
     d_ecg = {
-    "id": "urn:ngsi-ld:PolarH10TopicECG:001",
+    "id": "urn:ngsi-ld:PolarH10TopicECG:ecg",
     "type": "PolarH10TopicECG",
     "trialName": {
       "type": "Property",
@@ -91,7 +91,7 @@ def ngsi_create_trial_UC2(orion,orion_port,context,context_port):
     }
 
     d_hr = {
-    "id": "urn:ngsi-ld:PolarH10TopicHR:001",
+    "id": "urn:ngsi-ld:PolarH10TopicHR:hr",
     "type": "PolarH10TopicHR",
     "trialName": {
       "type": "Property",
@@ -131,7 +131,7 @@ def ngsi_create_trial_UC2(orion,orion_port,context,context_port):
     }
     ac = [[0,0,0]]*36
     d_acc = {
-    "id": "urn:ngsi-ld:PolarH10TopicACC:001",
+    "id": "urn:ngsi-ld:PolarH10TopicACC:acc",
     "type": "PolarH10TopicACC",
     "trialName": {
       "type": "Property",
@@ -263,9 +263,9 @@ def ngsi_start_trial_UC2(trial_name,orion,orion_port,context,context_port):
     entity1 = "urn:ngsi-ld:EmgFrequencyDomainFeatures:002"
     entity2 = "urn:ngsi-ld:sEMG:EMG1001"
     entity3 = "urn:ngsi-ld:HrvFeatures:001"
-    entity4 = "urn:ngsi-ld:PolarH10TopicHR:001"
-    entity5 = "urn:ngsi-ld:PolarH10TopicECG:001"
-    entity6 = "urn:ngsi-ld:PolarH10TopicACC:001"
+    entity4 = "urn:ngsi-ld:PolarH10TopicHR:hr"
+    entity5 = "urn:ngsi-ld:PolarH10TopicECG:ecg"
+    entity6 = "urn:ngsi-ld:PolarH10TopicACC:acc"
     data1 = {
         "trialName": {
             "type": "Property",
@@ -290,9 +290,9 @@ def ngsi_stop_trial_UC2(orion,orion_port,context,context_port):
     entity1 = "urn:ngsi-ld:EmgFrequencyDomainFeatures:001"
     entity2 = "urn:ngsi-ld:sEMG:EMG1001"
     entity3 = "urn:ngsi-ld:HrvFeatures:001"
-    entity4 = "urn:ngsi-ld:PolarH10TopicHR:001"
-    entity5 = "urn:ngsi-ld:PolarH10TopicECG:001"
-    entity6 = "urn:ngsi-ld:PolarH10TopicACC:001"
+    entity4 = "urn:ngsi-ld:PolarH10TopicHR:hr"
+    entity5 = "urn:ngsi-ld:PolarH10TopicECG:ecg"
+    entity6 = "urn:ngsi-ld:PolarH10TopicACC:acc"
 
     data1 = {
         "trialName": {
