@@ -69,21 +69,6 @@ def run_CEP():
 def CEP_UC1_thread(entityStress):
     CEP_UC1(entityStress)
 
-@app.route('/stop')
-def stop():
-    #stop_trial(client)
-    return render_template('index.html')
-# something to get data from previus trials this button should be availible on Index 
-
-@app.route('/historypage')
-def go_to_history():
-    print("this gives me a list of historical")
-
-@app.route('/download')
-def download_trial_data():
-    print('this downloads the data of a trial')
-
-
 if __name__ == "__main__":
     serve(app, host= "0.0.0.0", port= 3002)
 
